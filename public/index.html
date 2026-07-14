@@ -1,0 +1,19 @@
+<!doctype html><html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Friends Poker</title><link rel="stylesheet" href="style.css"></head><body>
+<div class="app">
+  <header><div><h1>FRIENDS POKER</h1><p>Texas Hold'em для друзей · виртуальные фишки</p></div><div id="roomBadge" class="badge hidden"></div></header>
+  <main>
+    <section id="welcome" class="panel welcome">
+      <h2>Играть с друзьями</h2><input id="name" placeholder="Ваше имя" maxlength="20">
+      <div class="grid2"><button id="createBtn" class="primary">Создать комнату</button><div class="join"><input id="code" placeholder="Код комнаты"><button id="joinBtn">Войти</button></div></div>
+      <p id="error" class="error"></p>
+    </section>
+
+    <section id="game" class="hidden">
+      <div class="topbar"><button id="copyBtn">Скопировать код</button><div id="status"></div><button id="startBtn" class="primary hidden">Начать игру</button><button id="nextBtn" class="primary hidden">Следующая раздача</button></div>
+      <div class="table-wrap"><div class="poker-table"><div id="pot" class="pot">Банк: 0</div><div id="community" class="community"></div><div id="players" class="players"></div></div></div>
+      <div id="actions" class="actions hidden"><button data-action="fold">Fold</button><button data-action="check">Check</button><button data-action="call">Call</button><input id="raiseAmount" type="number" min="50" step="50" value="100"><button data-action="raise">Raise</button><button data-action="allin" class="danger">All-in</button></div>
+      <div class="bottom"><div class="panel chat"><h3>Чат</h3><div id="messages"></div><div class="chatline"><input id="chatInput" placeholder="Сообщение"><button id="sendChat">Отправить</button></div></div><div class="panel rules"><h3>Управление</h3><p>Создатель комнаты запускает игру. В каждой раздаче автоматически меняется дилер и выставляются блайнды 25/50.</p></div></div>
+    </section>
+  </main>
+</div>
+<script src="/socket.io/socket.io.js"></script><script src="app.js"></script></body></html>
