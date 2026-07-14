@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#071611">
+  <title>Покер у Улукбека — Texas Hold'em</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="ambient"></div>
+<div class="app">
+  <header class="site-header">
+    <div class="brand">
+      <div class="brand-chip">U</div>
+      <div><h1>ПОКЕР У УЛУКБЕКА</h1><p>Закрытый клуб друзей · Texas Hold'em · виртуальные фишки</p></div>
+    </div>
+    <div class="header-actions">
+      <button id="walletBtn" class="wallet hidden">💰 <span id="walletBalance">0</span> фишек</button>
+      <div id="roomBadge" class="badge hidden"></div>
+    </div>
+  </header>
+
+  <main>
+    <section id="welcome" class="panel welcome">
+      <div class="welcome-copy">
+        <span class="eyebrow">PRIVATE POKER CLUB</span>
+        <h2>Соберите друзей за одним столом</h2>
+        <p>Создайте приватную комнату, отправьте код друзьям и сыграйте настоящую партию в Texas Hold'em.</p>
+      </div>
+      <input id="name" placeholder="Ваше имя за столом" maxlength="20" autocomplete="nickname">
+      <div class="grid2">
+        <button id="createBtn" class="primary big">Создать свой стол</button>
+        <div class="join"><input id="code" placeholder="Код комнаты" maxlength="6"><button id="joinBtn">Войти</button></div>
+      </div>
+      <div class="feature-row"><span>🃏 Красивые раздачи</span><span>🔒 Приватные комнаты</span><span>📱 Телефон и ПК</span></div>
+      <p id="error" class="error"></p>
+    </section>
+
+    <section id="game" class="hidden">
+      <div class="topbar panel-lite">
+        <button id="copyBtn">🔗 Скопировать код</button>
+        <div class="round-info"><span id="phaseLabel">Лобби</span><strong id="status">Ожидание игроков</strong></div>
+        <div class="top-controls"><button id="startBtn" class="primary hidden">Раздать карты</button><button id="nextBtn" class="primary hidden">Новая раздача</button></div>
+      </div>
+
+      <div class="table-wrap">
+        <div class="poker-table">
+          <div class="table-logo"><b>ULUKBEK</b><span>POKER CLUB</span></div>
+          <div id="pot" class="pot"><small>БАНК</small><strong>0</strong></div>
+          <div id="community" class="community"></div>
+          <div id="dealFx" class="deal-fx"></div>
+          <div id="players" class="players"></div>
+        </div>
+      </div>
+
+      <div id="handBanner" class="hand-banner hidden"></div>
+      <div id="actions" class="actions panel-lite hidden">
+        <button data-action="fold" class="muted">Пас</button>
+        <button data-action="check">Чек</button>
+        <button data-action="call">Колл</button>
+        <div class="raise-box"><input id="raiseAmount" type="number" min="50" step="50" value="100"><button data-action="raise">Рейз</button></div>
+        <button data-action="allin" class="danger">ALL-IN</button>
+      </div>
+
+      <div class="bottom">
+        <div class="panel chat"><h3>Чат стола</h3><div id="messages"><div class="system-msg">Добро пожаловать в «Покер у Улукбека»!</div></div><div class="chatline"><input id="chatInput" placeholder="Напишите сообщение"><button id="sendChat">Отправить</button></div></div>
+        <div class="panel rules"><h3>Texas Hold'em</h3><p>Блайнды 25/50. Каждый игрок получает две закрытые карты. На стол выходят флоп, тёрн и ривер. Побеждает лучшая комбинация из пяти карт.</p><div class="notice">Игра ведётся только на виртуальные фишки. Вывод денег и денежные выигрыши отсутствуют.</div></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div id="walletModal" class="modal hidden">
+  <div class="modal-card">
+    <button id="closeWallet" class="modal-close">×</button>
+    <span class="eyebrow">ВИРТУАЛЬНЫЙ КОШЕЛЁК</span>
+    <h2>Пополнение фишек через MBANK QR</h2>
+    <p class="modal-sub">Демонстрационный экран. QR не проводит реальный платёж и используется только для тестирования интерфейса.</p>
+    <div class="payment-layout">
+      <div class="qr-card">
+        <div class="mbank-logo">M<span>BANK</span></div>
+        <img src="mbank-demo-qr.svg" alt="Демонстрационный MBANK QR">
+        <small>DEMO QR · НЕ ДЛЯ ОПЛАТЫ</small>
+      </div>
+      <div class="packages">
+        <button class="package selected" data-chips="2000"><strong>2 000</strong><span>виртуальных фишек</span></button>
+        <button class="package" data-chips="5000"><strong>5 000</strong><span>виртуальных фишек</span></button>
+        <button class="package" data-chips="10000"><strong>10 000</strong><span>виртуальных фишек</span></button>
+        <button class="package" data-chips="25000"><strong>25 000</strong><span>виртуальных фишек</span></button>
+        <button id="demoTopup" class="primary big">Начислить демо-фишки</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+<script src="/socket.io/socket.io.js"></script><script src="app.js"></script>
+</body></html>
