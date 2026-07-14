@@ -52,7 +52,8 @@ function publicRoom(room, viewerId) {
       connected: p.connected,
       cards: p.id === viewerId || room.phase === 'showdown' ? p.cards : p.cards.map(() => null)
     })),
-    winnerText: room.winnerText || ''
+    winnerText: room.winnerText || '',
+    winningHand: room.winningHand || ''
   };
 }
 
@@ -100,6 +101,7 @@ function startHand(room) {
   room.currentBet = 0;
   room.phase = 'preflop';
   room.winnerText = '';
+  room.winningHand = '';
   room.players.forEach(p => {
     p.cards = p.connected && p.chips > 0 ? [room.deck.pop(), room.deck.pop()] : [];
     p.folded = !p.connected || p.chips <= 0;
@@ -166,6 +168,10 @@ function scoreFive(cards) {
   return [0,...vals];
 }
 
+function handName(score) {
+  return ['Старшая карта','Пара','Две пары','Сет','Стрит','Флеш','Фул-хаус','Каре','Стрит-флеш'][score?.[0] || 0];
+}
+
 function compareScore(a,b) { for(let i=0;i<Math.max(a.length,b.length);i++){ const d=(a[i]||0)-(b[i]||0); if(d) return d;} return 0; }
 function combinations(arr,k){ const out=[]; const rec=(start,p)=>{ if(p.length===k){out.push(p.slice());return;} for(let i=start;i<arr.length;i++){p.push(arr[i]);rec(i+1,p);p.pop();}}; rec(0,[]); return out; }
 function bestScore(cards){ let best=null; for(const hand of combinations(cards,5)){ const s=scoreFive(hand); if(!best||compareScore(s,best)>0) best=s;} return best; }
@@ -184,6 +190,7 @@ function showdown(room) {
   const remainder = room.pot - share * winners.length;
   if (winners[0]) winners[0].chips += remainder;
   room.winnerText = winners.length === 1 ? `${winners[0].name} выиграл банк ${room.pot}` : `Ничья: ${winners.map(w=>w.name).join(', ')} делят банк ${room.pot}`;
+  room.winningHand = handName(best);
   room.pot = 0;
   room.phase = 'showdown';
   room.currentPlayerId = null;
@@ -191,7 +198,7 @@ function showdown(room) {
 }
 
 function finishHand(room, winner) {
-  if (winner) { winner.chips += room.pot; room.winnerText = `${winner.name} выиграл банк ${room.pot}`; }
+  if (winner) { winner.chips += room.pot; room.winnerText = `${winner.name} выиграл банк ${room.pot}`; room.winningHand = 'Победа без вскрытия'; }
   room.pot = 0; room.phase = 'showdown'; room.currentPlayerId = null; emitRoom(room);
 }
 
@@ -217,7 +224,7 @@ io.on('connection', socket => {
   socket.on('room:create', ({ name }, cb) => {
     name = sanitizeName(name); if (!name) return cb?.({ error:'Введите имя' });
     let code; do { code = newCode(); } while (rooms.has(code));
-    const room = { code, hostId:socket.id, players:[], phase:'lobby', pot:0, currentBet:0, community:[], deck:[], dealerIndex:-1, currentPlayerId:null };
+    const room = { code, hostId:socket.id, players:[], phase:'lobby', pot:0, currentBet:0, community:[], deck:[], dealerIndex:-1, currentPlayerId:null, winnerText:'', winningHand:'' };
     room.players.push({ id:socket.id, name, chips:STARTING_CHIPS, bet:0, cards:[], folded:false, allIn:false, connected:true, acted:false });
     rooms.set(code, room); socket.join(code); cb?.({ ok:true, code }); emitRoom(room);
   });
@@ -261,6 +268,20 @@ io.on('connection', socket => {
       if(p.bet>room.currentBet){ room.currentBet=p.bet; room.players.forEach(o=>{if(o.id!==p.id&&!o.folded&&!o.allIn)o.acted=false;}); }
     } else return cb?.({error:'Неизвестное действие'});
     cb?.({ok:true}); afterAction(room,idx);
+  });
+
+
+  socket.on('wallet:demo-topup', ({ code, chips }, cb) => {
+    const room = rooms.get(String(code || '').toUpperCase());
+    const player = room?.players.find(p => p.id === socket.id);
+    const allowed = [2000, 5000, 10000, 25000];
+    chips = Number(chips);
+    if (!room || !player) return cb?.({ error:'Комната не найдена' });
+    if (!allowed.includes(chips)) return cb?.({ error:'Недоступный пакет фишек' });
+    if (!['lobby','showdown'].includes(room.phase)) return cb?.({ error:'Пополнять фишки можно только между раздачами' });
+    player.chips += chips;
+    cb?.({ ok:true, chips:player.chips });
+    emitRoom(room);
   });
 
   socket.on('chat:send', ({ code, text }) => {
